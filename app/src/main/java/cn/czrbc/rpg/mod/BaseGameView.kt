@@ -20,11 +20,12 @@ import java.util.*
     private var mThread: Thread = Thread(this)
     protected var paint: Paint = Paint()
     protected var textPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    protected var moving = false
     protected var drawable: Boolean = false
-    protected var moveTime = 0
     protected var fingerPoint = PointF(0f,0f)
-    protected var preMove = false
+
+    protected val map:Map
+    protected val role:Role
+    protected val effects:ArrayList<Effect>
     init {
         mSurfaceHolder.addCallback(this)
         textPaint.color = Color.WHITE
@@ -33,7 +34,14 @@ import java.util.*
         textPaint.strokeCap = Paint.Cap.ROUND
 //        textPaint.strokeWidth = 5f
         textPaint.textSize = 40f
+        map =initMap()
+        role =initRole()
+        effects =initEffects()
     }
+
+    abstract fun initMap():Map
+    abstract fun initRole():Role
+    abstract fun initEffects():ArrayList<Effect>
 
     @Synchronized
     private fun draw(){
@@ -88,21 +96,17 @@ import java.util.*
         }
     }
 
-    var maxMoveTime =0
     private fun move(){
-        if (moving ){
-            if (moveTime<maxMoveTime) {
+        if (role.moving ){
+            if (role.moveTime<role.maxMoveTime) {
                 roleMove()
-                moveTime++
+                role.moveTime++
             }else{
-                moveTime = 0
-                maxMoveTime =0
-                moving =false
-                preMove = false
+                role.stopMove()
             }
         }else{
-            moveTime = 0
-            maxMoveTime =0
+            role.moveTime = 0
+            role.maxMoveTime =0
         }
     }
     abstract fun roleMove()
@@ -117,16 +121,16 @@ import java.util.*
                 fingerPoint.x = event.rawX
                 fingerPoint.y = event.rawY
                 destination = Map.getMapPoint(fingerPoint)
-                moving =false
-                preMove =true
+                role.moving =false
+                role.preMove =true
                 return true
             }
             MotionEvent.ACTION_UP ->{
                 fingerPoint.x = event.rawX
                 fingerPoint.y = event.rawY
-                moving = true
+                role.moving = true
                 destination = Map.getMapPoint(fingerPoint)
-                maxMoveTime =getMoveTimeAll()
+                role.maxMoveTime =getMoveTimeAll()
                 return true
             }
         }

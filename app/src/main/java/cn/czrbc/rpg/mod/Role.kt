@@ -14,9 +14,20 @@ class Role(private val context: Context) {
 
     var point = PointF(0f,0f)
     var speed :Int= 5
+    var moving = false
+    var preMove =false
+    var moveTime = 0
+    var maxMoveTime = 0
 
     fun onDraw(canvas: Canvas,paint: Paint){
         val screenPoint = Map.getScreenPoint(point)
         canvas.drawBitmap(bitmap,screenPoint.x-width/2,screenPoint.y-height/2,paint)
+    }
+
+    fun stopMove() {
+        moveTime = 0
+        maxMoveTime =0
+        moving =false
+        preMove = false
     }
 }
